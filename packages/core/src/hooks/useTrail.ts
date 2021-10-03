@@ -4,8 +4,9 @@ import { Valid } from '../types/common'
 import { PickAnimated, SpringValues } from '../types'
 import { UseSpringProps } from './useSpring'
 import { SpringRef } from '../SpringRef'
-import { Controller } from '../Controller'
+import { Controller, ControllerQueue } from '../Controller'
 import { useSprings } from './useSprings'
+import { Lookup } from 'packages/types'
 
 export type UseTrailProps<Props extends object = any> = UseSpringProps<Props>
 
@@ -49,7 +50,9 @@ export function useTrail(
     (i, ctrl) => {
       const props = propsFn ? propsFn(i, ctrl) : propsArg
       reverse = reverse && props.reverse
-      return props
+      return {
+        ...props,
+      }
     },
     // Ensure the props function is called when no deps exist.
     // This works around the 3 argument rule.
@@ -61,7 +64,11 @@ export function useTrail(
   useLayoutEffect(() => {
     each(ref.current, (ctrl, i) => {
       const parent = ref.current[i + (reverse ? 1 : -1)]
-      if (parent) ctrl.start({ to: parent.springs })
+      if (parent) {
+        ctrl.start({
+          to: parent.springs,
+        })
+      }
     })
   }, deps)
 
